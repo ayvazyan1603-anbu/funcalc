@@ -65,12 +65,17 @@ jobs:
           name: gradle-failure-log
           path: gradle.log
 
-      - name: List Build Outputs
-        run: find android/app/build/outputs -type f || true
+      - name: Collect APK Files
+        run: |
+          mkdir -p apks
+          find . -name "*.apk" -type f
+          find . -name "*.apk" -type f -exec cp {} apks/ \;
+          ls -la apks/
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FunPay-Calculator-Android-APK
-          path: android/app/build/outputs/**/*.apk
+          name: FunPay-Calculator-v1.0-APK
+          path: apks/*
+          if-no-files-found: error
           retention-days: 30
