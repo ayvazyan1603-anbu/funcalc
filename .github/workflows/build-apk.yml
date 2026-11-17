@@ -33,7 +33,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Accept Android Licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platforms;android-36" || true
 
       - name: Install NPM Dependencies
         run: npm install
