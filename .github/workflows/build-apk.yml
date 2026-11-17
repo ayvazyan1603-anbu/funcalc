@@ -54,22 +54,22 @@ jobs:
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../gradle.log
 
-      - name: Print Gradle Log On Failure
-        if: failure()
-        run: tail -n 120 gradle.log || true
-
-      - name: Upload Failure Log
-        if: failure()
+      - name: Upload Build Log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gradle-failure-log
+          name: gradle-build-log
           path: gradle.log
 
-      - name: Collect APK Files
+      - name: Inspect Build Output and Collect APK
         run: |
           mkdir -p apks
+          echo "=== Find all files in android/app/build ==="
+          find android/app/build -type f || true
+          echo "=== Find all .apk files ==="
           find . -name "*.apk" -type f
           find . -name "*.apk" -type f -exec cp {} apks/ \;
+          echo "=== APKS directory contents ==="
           ls -la apks/
 
       - name: Upload APK Artifact
@@ -77,5 +77,4 @@ jobs:
         with:
           name: FunPay-Calculator-v1.0-APK
           path: apks
-          if-no-files-found: error
           retention-days: 30
