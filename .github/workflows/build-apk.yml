@@ -52,7 +52,18 @@ jobs:
       - name: Build Debug APK
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../gradle.log
+
+      - name: Print Gradle Log On Failure
+        if: failure()
+        run: tail -n 120 gradle.log || true
+
+      - name: Upload Failure Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-failure-log
+          path: gradle.log
 
       - name: Prepare APK Artifacts
         run: |
