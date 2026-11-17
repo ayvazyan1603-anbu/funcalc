@@ -1,0 +1,29 @@
+{
+  "name": "funpay-margin-calculator",
+  "version": "1.0.0",
+  "description": "FunPay Калькулятор Наценки и Вывода",
+  "main": "www/index.html",
+  "scripts": {
+    "start": "npx serve www -l 3000",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:build": "npx cap copy android"
+  },
+  "keywords": [
+    "funpay",
+    "calculator",
+    "crypto",
+    "usdt",
+    "markup"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}

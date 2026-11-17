@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#090d16">
+  <meta name="description" content="FunPay Калькулятор Наценки и Вывода средств">
+  <title>FunPay Калькулятор</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+  <!-- Toast Notification Container -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="app-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <line x1="6" y1="12" x2="10" y2="12"/>
+            <line x1="8" y1="10" x2="8" y2="14"/>
+            <line x1="14" y1="10" x2="18" y2="10"/>
+            <line x1="14" y1="14" x2="18" y2="14"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">FunPay Calc</span>
+          <span class="brand-tag">PRO • TRC20 / TON</span>
+        </div>
+      </div>
+
+      <!-- Quick Global Rate Sync Pill -->
+      <div class="header-rate-pill" id="headerRatePill" title="Курс USDT / RUB">
+        <span class="rate-label">USDT</span>
+        <span class="rate-value" id="headerRateDisplay">82.78 ₽</span>
+        <button class="rate-edit-btn" id="btnEditRate" aria-label="Изменить курс">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container with 3 Tabs -->
+  <main class="main-container">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: ЦЕНА ТОВАРА (РАСЧЁТ НАЦЕНКИ)       -->
+    <!-- ========================================== -->
+    <section id="tab-price" class="tab-view active">
+      
+      <!-- Sticky Result Card -->
+      <div class="sticky-result-card">
+        <div class="result-card-inner">
+          <div class="result-header">
+            <span class="badge-accent">Цена продажи на FunPay</span>
+            <div class="result-price-pair">
+              <div class="price-usd-badge" id="resPriceUsd">$1.78</div>
+            </div>
+          </div>
+
+          <div class="result-main-prices">
+            <div class="primary-price-group">
+              <span class="price-exact" id="resPriceRub">148 ₽</span>
+              <span class="price-round-label">или по 9:</span>
+              <span class="price-rounded-badge" id="resPriceRub9">149 ₽</span>
+            </div>
+            
+            <button class="btn-copy-price" id="btnCopyPriceRub">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span>Скопировать ₽</span>
+            </button>
+          </div>
+
+          <div class="result-subtext" id="resSubtext">
+            Наценка: <strong class="text-positive" id="resMarkupPercent">+137.9%</strong> | Чистая прибыль: <strong class="text-positive" id="resNetProfit">+65.4 ₽ ($0.79)</strong> с 1 шт.
+          </div>
+        </div>
+      </div>
+
+      <div class="content-body">
+        
+        <!-- Primary Inputs -->
+        <div class="card card-inputs">
+          <div class="form-group">
+            <div class="input-label-row">
+              <label for="inputPurchasePrice">Закупочная цена товара (USDT)</label>
+              <span class="label-hint">Цена у поставщика</span>
+            </div>
+            <div class="input-with-adornment">
+              <span class="adornment-left">$</span>
+              <input type="number" step="0.01" min="0.01" id="inputPurchasePrice" class="input-lg" placeholder="0.75" inputmode="decimal">
+              <span class="adornment-right">USDT</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-label-row">
+              <label for="inputUsdRate">Курс USDT → RUB (₽)</label>
+              <span class="label-hint">Синхронно для всех вкладок</span>
+            </div>
+            <div class="input-with-adornment">
+              <span class="adornment-left">₽</span>
+              <input type="number" step="0.01" min="1" id="inputUsdRate" class="input-md" placeholder="82.78" inputmode="decimal">
+              <button class="btn-input-action" id="btnResetRate" title="Сбросить на 82.78">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profit Multiplier (ROI) Presets -->
+        <div class="card card-presets">
+          <div class="presets-header">
+            <span class="section-title">Множитель прибыли (ROI)</span>
+            <span class="preset-summary-badge" id="presetMultiplierBadge">Цель: x2.0</span>
+          </div>
+
+          <div class="chip-grid">
+            <button class="chip-btn" data-multiplier="1.5">x1.5</button>
+            <button class="chip-btn active" data-multiplier="2.0">x2.0 (в 2 раза в плюс)</button>
+            <button class="chip-btn" data-multiplier="2.5">x2.5</button>
+            <button class="chip-btn" data-multiplier="3.0">x3.0</button>
+          </div>
+
+          <div class="custom-multiplier-row">
+            <label for="inputCustomRoi">Свой множитель:</label>
+            <div class="input-with-adornment mini">
+              <span class="adornment-left">x</span>
+              <input type="number" step="0.1" min="1.0" id="inputCustomRoi" placeholder="Напр. 1.8" inputmode="decimal">
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapsible Section: Settings & Fees -->
+        <div class="accordion-card" id="accordionSettings">
+          <button class="accordion-header" id="btnToggleSettings">
+            <div class="accordion-title-wrap">
+              <div class="accordion-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+              </div>
+              <div>
+                <span class="accordion-title">Настройки комиссий и партии</span>
+                <span class="accordion-subtitle" id="accordionSummaryText">Партия 100 USDT • TON CryptoBot</span>
+              </div>
+            </div>
+            <div class="accordion-chevron">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </button>
+
+          <div class="accordion-content">
+            <!-- Batch Volume -->
+            <div class="settings-subgroup">
+              <div class="input-label-row">
+                <label for="inputBatchVolume">Объём партии закупа/вывода (USDT)</label>
+                <span class="tariff-live-badge" id="batchTariffBadge">Вход: +4.4% / Выход: -2.4%</span>
+              </div>
+              <div class="slider-with-input">
+                <input type="range" min="10" max="2000" step="10" value="100" id="sliderBatchVolume" class="range-slider">
+                <div class="input-with-adornment mini">
+                  <input type="number" min="1" max="10000" id="inputBatchVolume" value="100" inputmode="numeric">
+                  <span class="adornment-right">$</span>
+                </div>
+              </div>
+              <p class="field-hint">Влияет на ступенчатую комиссию @BitcoinOperator</p>
+            </div>
+
+            <!-- Cashout Method Selector -->
+            <div class="settings-subgroup">
+              <label class="group-label">Способ обналичивания</label>
+              <div class="route-selector">
+                <label class="route-option">
+                  <input type="radio" name="cashoutRoute" value="route_ton" checked>
+                  <div class="route-card">
+                    <div class="route-icon-badge">TON</div>
+                    <div class="route-info">
+                      <span class="route-name">USDT → TON (CryptoBot) → Обменник</span>
+                      <span class="route-desc">Своп 0.75% + тариф обналичивания</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="route-option">
+                  <input type="radio" name="cashoutRoute" value="route_direct">
+                  <div class="route-card">
+                    <div class="route-icon-badge">USDT</div>
+                    <div class="route-info">
+                      <span class="route-name">Напрямую USDT → Обменник</span>
+                      <span class="route-desc">Без свопа, только тариф обменника</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="route-option">
+                  <input type="radio" name="cashoutRoute" value="route_p2p">
+                  <div class="route-card">
+                    <div class="route-icon-badge">P2P</div>
+                    <div class="route-info">
+                      <span class="route-name">P2P-маркет CryptoBot</span>
+                      <span class="route-desc">Фиксированно 1.0% вместо обменника</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Fine-grained Fee Settings -->
+            <div class="settings-grid">
+              <div class="form-group-compact">
+                <label for="inputFpSaleFee">Комиссия продажи FunPay (%)</label>
+                <div class="input-with-adornment mini">
+                  <input type="number" step="0.1" min="0" max="50" id="inputFpSaleFee" value="6.0" inputmode="decimal">
+                  <span class="adornment-right">%</span>
+                </div>
+              </div>
+
+              <div class="form-group-compact">
+                <label for="inputFpOutFee">Комиссия вывода FunPay (%)</label>
+                <div class="input-with-adornment mini">
+                  <input type="number" step="0.1" min="0" max="50" id="inputFpOutFee" value="2.0" inputmode="decimal">
+                  <span class="adornment-right">%</span>
+                </div>
+              </div>
+
+              <div class="form-group-compact">
+                <label for="inputFpFixedOutFee">Фикс. сеть вывода FunPay ($)</label>
+                <div class="input-with-adornment mini">
+                  <input type="number" step="0.05" min="0" max="20" id="inputFpFixedOutFee" value="1.50" inputmode="decimal">
+                  <span class="adornment-right">$</span>
+                </div>
+              </div>
+
+              <div class="form-group-compact">
+                <label for="inputBuyFixedFee">Фикс. сеть закупа USDT ($)</label>
+                <div class="input-with-adornment mini">
+                  <input type="number" step="0.05" min="0" max="20" id="inputBuyFixedFee" value="1.00" inputmode="decimal">
+                  <span class="adornment-right">$</span>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-text-danger" id="btnResetSettings">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              <span>Сбросить настройки комиссий</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loss Breakdown Waterfall (Tab 1) -->
+        <div class="card card-breakdown">
+          <div class="breakdown-header">
+            <span class="section-title">Детализация потерь на 1 шт.</span>
+            <span class="breakdown-sub" id="breakdownBatchSummary">партия ~133 шт.</span>
+          </div>
+
+          <div class="waterfall-list" id="unitWaterfallList">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: ВЫВОД СРЕДСТВ (СКОЛЬКО НА РУКИ)    -->
+    <!-- ========================================== -->
+    <section id="tab-withdraw" class="tab-view">
+      
+      <!-- Sticky Result Card for Withdrawal -->
+      <div class="sticky-result-card">
+        <div class="result-card-inner">
+          <div class="result-header">
+            <span class="badge-accent">Вы получите на карту / счёт</span>
+            <div class="price-usd-badge" id="resWithdrawUsd">$108.45</div>
+          </div>
+
+          <div class="result-main-prices">
+            <div class="primary-price-group">
+              <span class="price-exact text-success-bright" id="resWithdrawRub">8 977 ₽</span>
+            </div>
+            
+            <button class="btn-copy-price" id="btnCopyWithdrawRub">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span>Скопировать ₽</span>
+            </button>
+          </div>
+
+          <div class="result-subtext" id="resWithdrawSubtext">
+            Всего удержано: <strong class="text-danger" id="resWithdrawLost">-1 023 ₽ (-$12.36 | 10.2%)</strong>
+          </div>
+
+          <!-- Minimum Warning Banner -->
+          <div class="warning-banner hidden" id="withdrawMinWarning">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">
+              <strong>Сумма менее $20:</strong> у обменника действует фиксированная доп. комиссия <strong>200 AMD (~$0.50)</strong> на мелкие сделки.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-body">
+        
+        <!-- Withdrawal Main Input -->
+        <div class="card card-inputs">
+          <div class="input-label-row">
+            <label for="inputWithdrawAmount">Сумма к выводу с баланса FunPay</label>
+            <!-- Currency Switcher Toggle -->
+            <div class="currency-toggle" id="withdrawCurrencyToggle">
+              <button class="cur-btn active" data-cur="RUB">₽ (RUB)</button>
+              <button class="cur-btn" data-cur="USD">$ (USDT)</button>
+            </div>
+          </div>
+
+          <div class="input-with-adornment">
+            <span class="adornment-left" id="withdrawCurSymbol">₽</span>
+            <input type="number" step="1" min="1" id="inputWithdrawAmount" class="input-lg" placeholder="10000" inputmode="decimal">
+            <span class="adornment-right" id="withdrawCurCode">RUB</span>
+          </div>
+
+          <!-- Quick Chip Buttons for Withdrawal -->
+          <div class="chip-grid withdraw-chips" id="withdrawChipGrid">
+            <!-- Generated dynamically based on RUB or USD -->
+          </div>
+        </div>
+
+        <!-- Cashout Route Selector for Withdrawal Screen -->
+        <div class="card card-route-withdraw">
+          <div class="input-label-row">
+            <span class="section-title">Маршрут вывода</span>
+            <span class="tariff-live-badge" id="withdrawLiveTariffBadge">Обменник: -2.4%</span>
+          </div>
+
+          <div class="route-selector compact" id="withdrawRouteSelector">
+            <label class="route-option">
+              <input type="radio" name="withdrawRoute" value="route_ton" checked>
+              <div class="route-card">
+                <span class="route-tag">TON</span>
+                <span class="route-title">USDT → TON (CryptoBot) → Обменник</span>
+              </div>
+            </label>
+
+            <label class="route-option">
+              <input type="radio" name="withdrawRoute" value="route_direct">
+              <div class="route-card">
+                <span class="route-tag">USDT</span>
+                <span class="route-title">Напрямую USDT → Обменник</span>
+              </div>
+            </label>
+
+            <label class="route-option">
+              <input type="radio" name="withdrawRoute" value="route_p2p">
+              <div class="route-card">
+                <span class="route-tag">P2P</span>
+                <span class="route-title">P2P-маркет CryptoBot (1.0%)</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step-by-step Waterfall for Withdrawal -->
+        <div class="card card-breakdown">
+          <div class="breakdown-header">
+            <span class="section-title">Пошаговый водопад удержаний</span>
+            <span class="breakdown-sub">от FunPay до карты</span>
+          </div>
+
+          <div class="waterfall-list" id="withdrawWaterfallList">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: ПРАЙС-ЛИСТ (КАТАЛОГ ТОВАРОВ)       -->
+    <!-- ========================================== -->
+    <section id="tab-catalog" class="tab-view">
+      
+      <!-- Catalog Controls Header -->
+      <div class="catalog-top-bar">
+        <div class="search-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="catalogSearchInput" placeholder="Поиск товара в прайсе...">
+        </div>
+
+        <button class="btn-primary-add" id="btnOpenAddModal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Добавить</span>
+        </button>
+      </div>
+
+      <div class="catalog-info-ribbon">
+        <span>Курс: <strong id="catalogRateInfo">82.78 ₽</strong></span>
+        <span>Цель: <strong id="catalogRoiInfo">x2.0</strong></span>
+        <span>Партия: <strong id="catalogBatchInfo">100$</strong></span>
+      </div>
+
+      <!-- Items Grid / Cards -->
+      <div class="catalog-list" id="catalogItemsList">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add Item Modal -->
+  <div class="modal-backdrop hidden" id="addItemModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Добавить товар в прайс</h3>
+        <button class="modal-close-btn" id="btnCloseAddModal">&times;</button>
+      </div>
+      <form id="addItemForm" class="modal-body">
+        <div class="form-group">
+          <label for="newItemName">Название товара / лота</label>
+          <input type="text" id="newItemName" class="input-md" placeholder="Напр. Discord Nitro 1 мес" required>
+        </div>
+
+        <div class="form-group">
+          <label for="newItemCost">Цена закупа у поставщика (USDT)</label>
+          <div class="input-with-adornment mini">
+            <span class="adornment-left">$</span>
+            <input type="number" step="0.01" min="0.01" id="newItemCost" class="input-md" placeholder="1.50" inputmode="decimal" required>
+            <span class="adornment-right">USDT</span>
+          </div>
+        </div>
+
+        <div class="modal-preview" id="newItemPreview">
+          <div class="preview-line">
+            <span>Расчётная цена:</span>
+            <strong id="modalCalcPriceRub">-- ₽</strong>
+          </div>
+          <div class="preview-line">
+            <span>Чистая прибыль:</span>
+            <strong class="text-positive" id="modalCalcProfitRub">-- ₽</strong>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelAddModal">Отмена</button>
+          <button type="submit" class="btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="tab-price">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+          <line x1="7" y1="7" x2="7.01" y2="7"/>
+        </svg>
+      </div>
+      <span class="nav-label">Цена товара</span>
+    </button>
+
+    <button class="nav-item" data-tab="tab-withdraw">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+          <path d="M6 15h.01M10 15h2"/>
+        </svg>
+      </div>
+      <span class="nav-label">Вывод средств</span>
+    </button>
+
+    <button class="nav-item" data-tab="tab-catalog">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+      </div>
+      <span class="nav-label">Прайс-лист</span>
+    </button>
+  </nav>
+
+  <!-- Scripts -->
+  <script src="js/calculator.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

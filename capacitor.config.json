@@ -1,0 +1,12 @@
+{
+  "appId": "com.funpay.calculator",
+  "appName": "FunPay Калькулятор",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0f172a",
+    "allowMixedContent": true
+  }
+}
