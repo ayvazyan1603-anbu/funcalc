@@ -65,16 +65,12 @@ jobs:
           name: gradle-failure-log
           path: gradle.log
 
-      - name: Prepare APK Artifacts
-        run: |
-          mkdir -p output-apk
-          cp android/app/build/outputs/apk/debug/*.apk output-apk/FunPay-Calculator-v1.0.apk
-          echo "APK successfully prepared:"
-          ls -la output-apk/
+      - name: List Build Outputs
+        run: find android/app/build/outputs -type f || true
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FunPay-Calculator-Android-APK
-          path: output-apk/*.apk
+          path: android/app/build/outputs/**/*.apk
           retention-days: 30
